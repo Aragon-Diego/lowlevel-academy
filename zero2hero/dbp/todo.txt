@@ -1,0 +1,12 @@
+1.- Store information about employees:
+ - Name
+ - Address
+ - Hours Worked
+2.- Add employees to the database
+3.- Update employees in the database
+4.- Store all this information to a file
+5.- Load and edit the database file
+6.- Search the database by:
+ - Name
+ - Address
+ - Hours Worked
