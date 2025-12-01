@@ -9,7 +9,7 @@
 #include "common.h"
 #include "parse.h"
 
-void output_file(int fd, struct dbheader_t *dbhdr) {
+int output_file(int fd, struct dbheader_t *dbhdr) {
   if(fd < 0) {
     printf("got a bad FD from the user\n");
   }
@@ -21,10 +21,10 @@ void output_file(int fd, struct dbheader_t *dbhdr) {
   lseek(fd, 0, SEEK_SET);
   write(fd, dbhdr, sizeof(struct dbheader_t));
 
-  return;
+  return STATUS_SUCCESS;
 }
 
-int create_db_header(int fd, struct dbheader_t **headerOut) {
+int create_db_header(struct dbheader_t **headerOut) {
   struct dbheader_t *header = calloc(1, sizeof(struct dbheader_t));
   if(header == NULL) {
     printf("Malloc failed to create db header\n");
