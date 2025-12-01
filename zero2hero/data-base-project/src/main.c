@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <getopt.h>
+#include <stdlib.h>
 
 #include "common.h"
 #include "file.h"
@@ -19,16 +20,22 @@ int main(int argc, char *argv[]) {
   int dbfd = -1;
   int c;
   char *filepath = NULL;
+  char *addstring = NULL;
   bool newfile = false;
   struct dbheader_t *dbhdr = NULL;
+  struct employee_t *employees = NULL;
+  
 
-  while((c = getopt(argc, argv, "nf:")) != -1) {
+  while((c = getopt(argc, argv, "nf:a:")) != -1) {
     switch(c) {
       case 'n':
         newfile = true;
         break;
       case 'f':
         filepath = optarg;
+        break;
+      case 'a':
+        addstring = optarg;
         break;
       case '?':
         printf("Unknown option -%c\n", c);
@@ -50,7 +57,7 @@ int main(int argc, char *argv[]) {
       printf("Unable to create database file\n");
       return -1;
     }
-    if(create_db_header(dbfd, &dbhdr) == STATUS_ERROR) {
+    if(create_db_header(&dbhdr) == STATUS_ERROR) {
       printf("Failed to create database header\n");
       return -1;
     }
@@ -65,8 +72,18 @@ int main(int argc, char *argv[]) {
       return -1;
     }
   }
+  if(read_employees(dbfd, dbhdr, &employees) != STATUS_SUCCESS) {
+    printf("Failed read employees\n");
+    return -1;
+  }
+  if (addstring) {
+    dbhdr->count++;
+    employees = realloc(employees, dbhdr->count*(sizeof(struct employee_t)));
 
-  output_file(dbfd, dbhdr);
+    add_employee(dbhdr, employees, addstring);
+  }
+
+  output_file(dbfd, dbhdr, employees);
 
   return 0;
 }
