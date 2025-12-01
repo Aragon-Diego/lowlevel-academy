@@ -8,7 +8,7 @@
 #include "common.h"
 
 int create_db_file(char *filename) {
-  int fd = open(filename, O_RDWR);
+  int fd = open(filename, O_RDONLY);
   if(fd != -1) {
     close(fd);
     printf("File already exists \n");
