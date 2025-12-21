@@ -113,7 +113,6 @@ int main(int argc, char *argv[]) {
   }
   if (indexstring) {
     index_to_modify = (unsigned int) atoi(indexstring);
-    printf("the index %i \n", index_to_modify);
   } else if (namestring) {
     int status = search_index_by_name(dbhdr, employees, namestring, &index_to_modify);
     if (status == STATUS_NOT_FIND_ERROR) {
@@ -122,7 +121,6 @@ int main(int argc, char *argv[]) {
     if (status <= STATUS_ERROR) {
       return 0;
     }
-    printf("the index for \" %s \" is %i\n", namestring, index_to_modify);
   }
 
   if (index_to_modify > dbhdr->count -1) {
@@ -130,11 +128,12 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  if (removeMode) {
+  if (removeMode && (indexstring || namestring)) {
+    printf("on remove mode on index: %i\n", index_to_modify);
     remove_employee(dbhdr, &employees, index_to_modify);
   }
   
   output_file(dbfd, dbhdr, employees);
-
+  close(dbfd);
   return 0;
 }

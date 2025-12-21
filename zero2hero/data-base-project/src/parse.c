@@ -39,26 +39,23 @@ int search_index_by_name(struct dbheader_t *dbhdr, struct employee_t *employees,
 }
 
 int remove_employee(struct dbheader_t *dbhdr, struct employee_t **employees, int index) {
-  struct employee_t *e = calloc( dbhdr->count - 1, sizeof(struct employee_t));
+  int count = dbhdr->count;
+  struct employee_t *e = calloc(count - 1, sizeof(struct employee_t));
   if (e == NULL) {
     printf("malloc failed\n");
     return STATUS_ERROR;
   }
   int i = 0;
   int j = 0;
-  printf("name %s \n", employees[i]->name);
-  printf("count %i \n", dbhdr->count);
   for(; i < dbhdr->count; i++) {
-    if (i != index) {
-      j++;
-      strncpy(e[j].name, employees[i]->name, sizeof(employees[i]->name) - 1);
-      strncpy(e[j].address, employees[i]->address, sizeof(employees[i]->address) - 1);
-      e[j].hours = employees[i]->hours;
+    if(i == index) {
+      continue;
     }
+    e[j++] = (*employees)[i];
   }
-  dbhdr->count--;
+  free(*employees);
   *employees = e;
-  list_employee(dbhdr, e);
+  dbhdr->count = count - 1;
   return STATUS_SUCCESS;
 }
 
@@ -67,8 +64,6 @@ int edit_employee(struct dbheader_t *dbhdr, struct employee_t **employees, char 
 }
 
 int add_employee(struct dbheader_t *dbhdr, struct employee_t **employees, char *addstring) {
-  printf("%s\n", addstring);
-
   if (dbhdr == NULL || employees == NULL || *employees == NULL || addstring == NULL) {
     return STATUS_ERROR;
   }
@@ -85,8 +80,6 @@ int add_employee(struct dbheader_t *dbhdr, struct employee_t **employees, char *
   if(hours == NULL) {
     return STATUS_ERROR;
   }
-
-  printf("%s %s %s \n", name, addr, hours);
   struct employee_t *e = *employees;
   e = realloc(e, (sizeof(struct employee_t)) * (dbhdr->count + 1));
   if (e == NULL) {
@@ -133,7 +126,6 @@ int output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) 
   }
 
   int realcount = dbhdr->count;
-
   dbhdr->magic = htonl(dbhdr->magic);
   dbhdr->filesize = htonl(sizeof(struct dbheader_t) + (sizeof(struct employee_t) * realcount));
   dbhdr->count = htons(dbhdr->count);
@@ -147,7 +139,8 @@ int output_file(int fd, struct dbheader_t *dbhdr, struct employee_t *employees) 
     employees[i].hours = htonl(employees[i].hours);
     write(fd, &employees[i], sizeof(struct employee_t));
   }
-
+  off_t new_size = (off_t) (sizeof(struct dbheader_t) + sizeof(struct employee_t) * realcount);
+  if (ftruncate(fd, new_size) != 0) return STATUS_ERROR;
   return STATUS_SUCCESS;
 }
 
@@ -161,8 +154,9 @@ int validate_db_header(int fd, struct dbheader_t **headerOut) {
     printf("Malloc failed to create db header\n");
     return STATUS_ERROR;
   }
-
-  if (read(fd, header, sizeof(struct dbheader_t)) != sizeof(struct dbheader_t)) {
+  int size1 = read(fd, header, sizeof(struct dbheader_t));
+  int size2 = sizeof(struct dbheader_t);
+  if (size1 != size2) {
     perror("read");
     free(header);
     return STATUS_ERROR;
@@ -201,13 +195,10 @@ int create_db_header(struct dbheader_t **headerOut) {
     printf("Malloc failed to create db header\n");
     return STATUS_ERROR;
   }
-
   header->version = 0x1;
   header->count = 0;
   header->magic = HEADER_MAGIC;
   header->filesize = sizeof(struct dbheader_t);
-
   *headerOut = header;
-
   return STATUS_SUCCESS;
 }
