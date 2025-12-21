@@ -8,6 +8,7 @@ run: clean default
 				./$(TARGET) -f ./mynewdb.db -a "Aldo Sierra., Sheshire Ln.,120"
 				./$(TARGET) -f ./mynewdb.db -a "PENDEJI Sierra., Sheshire Ln.,120"
 				./$(TARGET) -f ./mynewdb.db -r -i "1"
+				./$(TARGET) -f ./mynewdb.db -e "Shinji Sierra., Sheshire Ln.,121" -i "1"
 
 default: $(TARGET)
 

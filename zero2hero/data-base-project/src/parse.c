@@ -60,6 +60,31 @@ int remove_employee(struct dbheader_t *dbhdr, struct employee_t **employees, int
 }
 
 int edit_employee(struct dbheader_t *dbhdr, struct employee_t **employees, char *editstring, int index) {
+  if (dbhdr == NULL || employees == NULL || *employees == NULL || editstring == NULL) {
+    return STATUS_ERROR;
+  }
+
+  char *name = strtok(editstring, ",");
+  if(name == NULL) {
+    return STATUS_ERROR;
+  }
+  char *addr = strtok(NULL, ",");
+  if(addr == NULL) {
+    return STATUS_ERROR;
+  }
+  char *hours = strtok(NULL, ",");
+  if(hours == NULL) {
+    return STATUS_ERROR;
+  }
+  struct employee_t *e = *employees;
+  if (e == NULL) {
+    return STATUS_ERROR;
+  }
+  strncpy(e[index].name, name, sizeof(e[index].name) - 1);
+  strncpy(e[index].address, addr, sizeof(e[index].name) - 1);
+  e[index].hours = atoi(hours);
+  *employees = e;
+
   return STATUS_SUCCESS;
 }
 

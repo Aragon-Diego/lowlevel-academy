@@ -131,6 +131,8 @@ int main(int argc, char *argv[]) {
   if (removeMode && (indexstring || namestring)) {
     printf("on remove mode on index: %i\n", index_to_modify);
     remove_employee(dbhdr, &employees, index_to_modify);
+  } else if(editstring && (indexstring || namestring)) {
+    edit_employee(dbhdr, &employees, editstring, index_to_modify);
   }
   
   output_file(dbfd, dbhdr, employees);
